@@ -1,45 +1,24 @@
-# If you need to install any of these:
-install.packages("rtweet")
-install.packages("reactable")
-install.packages("glue")
-install.packages("stringr")
-install.packages("httpuv")
-install.packages("dplyr")
-install.packages("purrr")
-library(rtweet)
-library(dplyr)
+# https://www.infoworld.com/article/3516150/create-a-shiny-app-to-search-twitter-with-rtweet-and-r.html
 
-tweet_df <- search_tweets("#tesla", n = 200, 
-            include_rts = FALSE)
-
-tweet_table_data <- select(tweets, -user_id, -status_id)
-library(reactable)
-reactable(tweet_table_data)
-
-reactable(tweet_table_data, 
-          filterable = TRUE, searchable = TRUE, bordered = TRUE, 
-          striped = TRUE, highlight = TRUE,
-          defaultPageSize = 25, showPageSizeOptions = TRUE, 
-          showSortable = TRUE, pageSizeOptions = c(25, 50, 75, 100, 200), defaultSortOrder = "desc",
-            columns = list(
-            created_at = colDef(defaultSortOrder = "asc"),
-            screen_name = colDef(defaultSortOrder = "asc"),
-            text = colDef(html = TRUE, minWidth = 190, resizable = TRUE),
-            favorite_count = colDef(filterable = FALSE),
-            retweet_count = colDef(filterable =  FALSE),
-            urls_expanded_url = colDef(html = TRUE)
-          )
-) 
-
-glue::glue("https://twitter.com/{screen_name}/status/{status_id}")
-
-Tweet = glue::glue("{text} <a href='https://twitter.com/{screen_name}/status/{status_id}'>>> </a>") 
-
+# Configure variables: number of tweets to download and hashtag search query
+num_tweets_to_download <- 200
+hashtag_to_search <- "#tesla"
+# Make sure to install any packages listed below that you don't already have on your system:
+library("rtweet")
+library("reactable")
+library("glue")
+library("stringr")
+library("httpuv")
+library("dplyr")
+library("purrr")
+# Code to actually search for tweets
+tweet_df <- search_tweets(hashtag_to_search, n = num_tweets_to_download, include_rts = FALSE)
+# select a few desired columns and add a clickable link to tweet text for table data
 tweet_table_data <- tweet_df %>%
   select(user_id, status_id, created_at, screen_name, text, favorite_count, retweet_count, urls_expanded_url) %>%
   mutate(
     Tweet = glue::glue("{text} <a href='https://twitter.com/{screen_name}/status/{status_id}'>>> </a>") 
-    )%>%
+  )%>%
   select(DateTime = created_at, User = screen_name, Tweet, Likes = favorite_count, RTs = retweet_count, URLs = urls_expanded_url)
 
 make_url_html <- function(url) {
@@ -53,10 +32,9 @@ make_url_html <- function(url) {
     paste0(purrr::map_chr(url, ~ paste0("<a title = '", .x, "' target = '_new' href = '", .x, "'>", .x, "</a>", collapse = ", ")), collapse = ", ")
   }
 }
-
 tweet_table_data$URLs <- purrr::map_chr(tweet_table_data$URLs, make_url_html)
 
-reactable(tweet_table_data, 
+reactable::reactable(tweet_table_data, 
           filterable = TRUE, searchable = TRUE, bordered = TRUE, striped = TRUE, highlight = TRUE,
           showSortable = TRUE, defaultSortOrder = "desc", defaultPageSize = 25, showPageSizeOptions = TRUE, pageSizeOptions = c(25, 50, 75, 100, 200), 
           columns = list(
@@ -67,4 +45,4 @@ reactable(tweet_table_data,
             RTs = colDef(filterable =  FALSE, format = colFormat(separators = TRUE)),
             URLs = colDef(html = TRUE)
           )
-) 
+)
