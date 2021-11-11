@@ -10,7 +10,7 @@ library(ggraph)
 
 source("keys.R")
 
-climate_tweets <- search_tweets(q = "#Tesla", n = 500,
+climate_tweets <- search_tweets(q = "#Thanksgiving", n = 2500,
                                       lang = "en",
                                       include_rts = FALSE)
 
@@ -34,6 +34,8 @@ data("stop_words")
 cleaned_tweet_words <- climate_tweets_clean %>%
   anti_join(stop_words)
 
+print(cleaned_tweet_words)
+
 cleaned_tweet_words %>%
   count(word, sort = TRUE) %>%
   top_n(50) %>%
@@ -46,3 +48,4 @@ cleaned_tweet_words %>%
       y = "Unique words",
       title = "Count of top 50 unique words found in #Tesla",
       subtitle = "Stop words removed from the list")
+

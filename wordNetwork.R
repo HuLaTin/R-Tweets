@@ -11,7 +11,7 @@ library(tidyr)
 
 source("keys.R")
 
-climate_tweets <- search_tweets(q = "#Arkansas", n = 2500,
+climate_tweets <- search_tweets(q = "#Thanksgiving", n = 2500,
                                       lang = "en",
                                       include_rts = FALSE)
 
